@@ -3,8 +3,7 @@
 str = ARGV.first
 
 def files_changed
-  head_branch = ENV['HEAD_BRANCH'].to_s || 'master'
-
+  head_branch = ARGV[1] || 'main'
   commit_base = `git merge-base HEAD #{head_branch}`
 
   `git diff --name-only HEAD..#{commit_base}`.split("\n")
@@ -15,7 +14,7 @@ when 'rspec'
   puts `bundle exec rspec #{files_changed} -f p`
 
 when 'mini_test'
-  prefix_test = ENV['PREFIX_TEST'] || 'test_legacy'
+  prefix_test = ARGV[2] || 'test/'
 
   files_changed.each do |file|
     next unless file.include?(prefix_test)
