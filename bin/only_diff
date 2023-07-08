@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+str = ARGV.first
+
+def files_changed
+  head_branch = ENV['HEAD_BRANCH'].to_s || 'master'
+
+  commit_base = `git merge-base HEAD #{head_branch}`
+
+  `git diff --name-only HEAD..#{commit_base}`.split("\n")
+end
+
+case str
+when 'rspec'
+  puts `bundle exec rspec #{files_changed} -f p`
+
+when 'mini_test'
+  prefix_test = ENV['PREFIX_TEST'] || 'test_legacy'
+
+  files_changed.each do |file|
+    next unless file.include?(prefix_test)
+
+    puts "Testing file: #{file}"
+
+    puts `bundle exec m #{file}`
+  end
+
+when 'rubocop'
+  puts `rubocop --color #{files_changed} -a`
+
+when 'files_changed'
+  puts files_changed
+  puts "#{files_changed.size} files changed"
+
+else
+  puts 'Invalid command'
+end
