@@ -1,19 +1,19 @@
 #!/usr/bin/env ruby
 
-str = ARGV.first
-
 def files_changed
+  return @files_changed if defined? @files_changed
+
   head_branch = ARGV[1] || 'main'
   commit_base = `git merge-base HEAD #{head_branch}`
 
-  `git diff --name-only HEAD..#{commit_base}`.split("\n")
+  @files_changed = `git diff --name-only HEAD..#{commit_base}`.split("\n")
 end
 
-case str
-when 'rspec'
-  puts `bundle exec rspec #{files_changed} -f p`
+def rspec
+  %x(bundle exec rspec #{files_changed} -f p)
+end
 
-when 'mini_test'
+def mini_test
   prefix_test = ARGV[2] || 'test/'
 
   files_changed.each do |file|
@@ -21,16 +21,33 @@ when 'mini_test'
 
     puts "Testing file: #{file}"
 
-    puts `bundle exec m #{file}`
+    %x(bundle exec m #{file})
   end
+end
 
-when 'rubocop'
-  puts `rubocop --color #{files_changed} -a`
+def rubocop
+  %x(rubocop --color #{files_changed} -a)
+end
 
-when 'files_changed'
+def show_files_changed
   puts files_changed
   puts "#{files_changed.size} files changed"
-
-else
-  puts 'Invalid command'
 end
+
+def execute(command)
+  if files_changed.empty?
+    puts 'No files changed'
+    return
+  end
+
+  case ARGV[0]
+  when 'rspec'         then rspec
+  when 'mini_test'     then mini_test
+  when 'rubocop'       then rubocop
+  when 'files_changed' then show_files_changed
+  else
+    puts 'Invalid command'
+  end
+end
+
+execute(ARGV[0])
