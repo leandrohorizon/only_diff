@@ -10,7 +10,7 @@ def files_changed
 end
 
 def rspec
-  %x(bundle exec rspec #{files_changed} -f p)
+  `bundle exec rspec #{files_changed} -f p`
 end
 
 def mini_test
@@ -21,12 +21,12 @@ def mini_test
 
     puts "Testing file: #{file}"
 
-    %x(bundle exec m #{file})
+    `bundle exec m #{file}`
   end
 end
 
 def rubocop
-  %x(rubocop --color #{files_changed} -a)
+  `rubocop -a #{files_changed.join(' ')} --color`
 end
 
 def show_files_changed
@@ -40,7 +40,7 @@ def execute(command)
     return
   end
 
-  case ARGV[0]
+  case command
   when 'rspec'         then rspec
   when 'mini_test'     then mini_test
   when 'rubocop'       then rubocop
