@@ -10,7 +10,9 @@ def files_changed
 end
 
 def rspec
-  `bundle exec rspec #{files_changed} -f p`
+  rspec_files = files_changed.select{ |file| file.match(/.+_spec\.rb/) }
+
+  puts `bundle exec rspec #{rspec_files.join(' ')} -f p`
 end
 
 def mini_test
@@ -21,12 +23,14 @@ def mini_test
 
     puts "Testing file: #{file}"
 
-    `bundle exec m #{file}`
+    puts `bundle exec m #{file}`
   end
 end
 
 def rubocop
-  `rubocop -a #{files_changed.join(' ')} --color`
+  ruby_files = files_changed.select{ |file| file.match(/.+\.rb/) }
+
+  puts `rubocop -a #{ruby_files.join(' ')} --color`
 end
 
 def show_files_changed
